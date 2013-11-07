@@ -1,0 +1,34 @@
+extends auth
+
+block auth
+  form.signup.form-horizontal(action="/users", method="post")
+    .control-group
+      label.control-label(for='name') 全名
+      .controls
+        input#name(type='text', name="name", placeholder='Full name', value=user.name)
+
+    .control-group
+      label.control-label(for='icon') 用户头像
+      .controls
+        input#icon(type='text', name="icon", placeholder='http://....', value=user.icon)
+
+    .control-group
+      label.control-label(for='email') Email
+      .controls
+        input#email(type='text', name="email", placeholder='Email', value=user.email)
+
+    .control-group
+      label.control-label(for='username') 用户名
+      .controls
+        input#username(type='text', name="username", placeholder='Username', value=user.username)
+
+    .control-group
+      label.control-label(for='password') 密码
+      .controls
+        input#password(type='password', name="password", placeholder='Password')
+
+    .form-actions
+      button.btn.btn-primary(type='submit') 注册
+      &nbsp;
+      | or&nbsp;
+      a.show-login(href="/signin") 登录

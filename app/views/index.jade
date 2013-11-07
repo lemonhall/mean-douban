@@ -1,0 +1,145 @@
+extends layouts/default
+
+block content
+
+	script(type='text/javascript', src='../lib/jquery/jquery.min.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.ui.widget.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.iframe-transport.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.fileupload.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.cloudinary.js')
+
+	style.
+		.status-item .usr-pic {
+			float: left;
+			position: relative;
+			z-index: 1;
+			margin-right: 40px;
+			margin-bottom: 30px;
+		}
+		.status-item .text {
+			position: relative;
+			left: -20px;
+			font-size: 13px;
+			line-height: 1.45;
+		}
+		.status-item .bd {
+			padding-bottom: 24px;
+			overflow: hidden;
+			zoom: 1;
+			border-bottom: 1px solid #e5e5e5;
+		}
+		.status-item .status-saying .group-pics {
+			margin-top: 5px;
+			margin-bottom: 12px;
+		}
+		.status-item .mod blockquote {
+			margin-top: 10px;
+			padding: 0 20px;
+			background: url(http://img3.douban.com/pics/quotel.gif) no-repeat 2px 4px;
+		}
+		.status-item .mod .actions {
+			padding-left: 20px;
+			margin-top: 8px;
+			color: #aaa;
+		}
+		.mod:after {
+			content: '\0020';
+			display: block;
+			clear: both;
+		}
+		.ico-pic {
+			background: url(http://img3.douban.com/pics/isay_icons.3.png) no-repeat;
+			display: inline-block;
+			height: 20px;
+			width: 18px;
+			margin-right: 12px;
+			text-indent: 999em;
+			overflow: hidden;
+			line-height: 20px;
+			color: #888;
+			font-family: stheiti,tahoma,simsun,sans-serif;
+			background-position-x: 0px;
+			background-position-y: -35px;
+		}
+
+
+	section(data-ng-controller='ShuosController',data-ng-init='find()')
+
+		form(style='display:none',enctype="multipart/form-data")!=cloudinary.uploader.image_upload_tag('image')
+		form(class='form-horizontal',data-ng-submit='create()')
+			textarea(data-ng-model='content',id='content',style='width:600px',cols='60',rows='2',placeholder='说点什么')
+			input(type='submit',class='btn',value='我说')
+			a(href='javascript:tiggerFileUpload();',tabindex='-1',data-action='pic',class='ico ico-pic',title='上传照片')照片
+
+		.preview 
+		span.status
+
+		div(class='status-items')
+			div(class='status-item',data-ng-repeat='shuo in shuos')
+				div(class='mod')
+					div(class='hd')
+						div(class='usr-pic')
+							img(ng-src='{{shuo.user.icon}}',alt='Starling')
+						div(class='text')
+							{{shuo.user.name}}
+					div(class='bd')
+						div(class='status-saying')
+							blockquote
+								p
+									{{shuo.content}}
+							div(data-ng-show='shuo.img',class='attachments-saying group-pics')
+								span(class='group-pic')
+									span(class='pic-wrap')
+										img(ng-src='{{shuo.img.url}}')
+										i(class='valign')							
+						div(class='actions')
+							span(class='created_at',title='2013-11-07 13:06:42')
+								a(href='#')刚刚
+						div(class='others')
+							div(class='comments')
+
+
+	script(type="text/javascript").
+		// Configure Cloudinary
+		$.cloudinary.config({ api_key: '!{api_key}', cloud_name: '!{cloud_name}' });
+
+		function tiggerFileUpload(){
+			$(".cloudinary-fileupload").trigger("click");
+		}
+
+		$(".cloudinary-fileupload")
+		.fileupload({ 
+			// Uncomment the following lines to enable client side image resizing and valiation.
+			// Make sure cloudinary/processing is included the js file
+			disableImageResize: false,
+			imageMaxWidth: 800,
+			imageMaxHeight: 600,
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png|bmp|ico)$/i,
+			maxFileSize: 1000000, // 20MB
+			dropZone: "#direct_upload",
+			start: function (e) {
+				$(".status").text("Starting upload...");
+			},
+			progress: function (e, data) {
+				$(".status").text("Uploading... " + Math.round((data.loaded * 100.0) / data.total) + "%");
+			},
+			fail: function (e, data) {
+				$(".status").text("Upload failed");
+			}
+			})
+			.off("cloudinarydone").on("cloudinarydone", function (e, data) {
+			//$("#photo_bytes").val(data.result.bytes);
+			$(".status").text("");
+			$(".preview").html(
+				$.cloudinary.image(data.result.public_id, {
+					format: data.result.format, width: 50, height: 50, crop: "fit"
+				})
+			);
+				console.log(data.result);
+				$.post("/upload",data.result,function(imgInterFaceReturn){
+					console.log(imgInterFaceReturn);
+					window.imgInterFaceReturn=imgInterFaceReturn;
+				});
+			});//End of $(".cloudinary-fileupload")
+	script(type="text/javascript").
+		window.user = !{user};

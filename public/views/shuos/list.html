@@ -1,0 +1,16 @@
+<section data-ng-controller="ShuosController" data-ng-init="find()">
+	<form class="form-horizontal" data-ng-submit="create()">
+		<textarea data-ng-model="content" id="content" cols="40" rows="2" placeholder="说点什么"></textarea>
+		<input type="submit" class="btn" value="我说">
+	</form>
+
+	<ul class="shuos unstyled">
+		<li data-ng-repeat="shuo in shuos">
+			<div><img ng-src='{{shuo.user.icon}}' 
+					style="
+							margin-right: 20px;
+							margin-bottom:10px;
+							">{{shuo.user.name}} 说:  {{shuo.content}}</div>
+		</li>
+	</ul>
+</section>

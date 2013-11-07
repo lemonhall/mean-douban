@@ -1,0 +1,67 @@
+extends layouts/default
+
+block content
+
+	script(type='text/javascript', src='../lib/jquery/jquery.min.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.ui.widget.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.iframe-transport.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.fileupload.js')
+	script(type='text/javascript', src='../lib/cloudinary/js/jquery.cloudinary.js')
+
+
+
+	section(data-ng-controller='ShuosController',data-ng-init='find()')
+
+		form(enctype="multipart/form-data")!=cloudinary.uploader.image_upload_tag('image')
+		form(class='form-horizontal',data-ng-submit='create()')
+			textarea(data-ng-model='content',id='content',cols='40',rows='2',placeholder='说点什么')
+			input(type='submit',class='btn',value='我说')
+
+		.preview 
+		span.status
+
+		ul(class='shuos unstyled')
+			li(data-ng-repeat='shuo in shuos')
+				div
+					img(ng-src='{{shuo.user.icon}}',
+						style='margin-right: 20px;margin-bottom:10px;')
+					{{shuo.user.name}} 说:  {{shuo.content}}
+
+
+
+
+	script(type="text/javascript").
+		// Configure Cloudinary
+		$.cloudinary.config({ api_key: '!{api_key}', cloud_name: '!{cloud_name}' });
+
+
+		$(".cloudinary-fileupload")
+		.fileupload({ 
+			// Uncomment the following lines to enable client side image resizing and valiation.
+			// Make sure cloudinary/processing is included the js file
+			disableImageResize: false,
+			imageMaxWidth: 800,
+			imageMaxHeight: 600,
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png|bmp|ico)$/i,
+			maxFileSize: 1000000, // 20MB
+			dropZone: "#direct_upload",
+			start: function (e) {
+				$(".status").text("Starting upload...");
+			},
+			progress: function (e, data) {
+				$(".status").text("Uploading... " + Math.round((data.loaded * 100.0) / data.total) + "%");
+			},
+			fail: function (e, data) {
+				$(".status").text("Upload failed");
+			}
+			})
+			.off("cloudinarydone").on("cloudinarydone", function (e, data) {
+			//$("#photo_bytes").val(data.result.bytes);
+			$(".status").text("");
+			$(".preview").html(
+				$.cloudinary.image(data.result.public_id, {
+					format: data.result.format, width: 50, height: 50, crop: "fit"
+				})
+			);
+				console.log(data.result);
+			});//End of $(".cloudinary-fileupload")
